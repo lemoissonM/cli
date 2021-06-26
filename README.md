@@ -2,6 +2,24 @@
 
 The [Sequelize](https://sequelize.org) Command Line Interface (CLI)
 
+## Improvement (lemoissonM)
+
+- Added controller (CRUD) and validator (create and update) when generating model
+
+- Use npx `https://github.com/lemoissonM/cli ....`
+When passing the attributes you can now add the reference and notNull properties direclty from the cli
+ex: `https://github.com/lemoissonM/cli model:generate --name User --attributes 'name:string:notNull,roleId:uuid:ref(roles;id):notNull'`
+
+In the example : we are creating the table user with the attribute name of type string and it should not allow nulls, we are also adding another attribute 'roleId' which is uuid, we are adding reference to the roles table with target 'id'
+
+### New syntax of attributes 
+
+- if attribute has reference :  `nameOfAttribute:dataType:ref(tableName;targetKey)`
+- if attribute should not be null : `nameOfAttribute:dataType:notNull`
+- if attribute should not be null and has reference : `nameOfAttribute:dataType:ref(tableName;targetKey):notNull ( in this case notNull comes after reference)`
+
+### When generating the validation all attributes with not null will be set as required 
+
 ## Table of Contents
 
 - [Installation](#installation)
