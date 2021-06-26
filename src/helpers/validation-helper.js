@@ -18,8 +18,8 @@ function validateDataType(dataType) {
 function getReference(referenceString){
   const reference= referenceString.replace('(', '').replace(')', '').replace('ref', '');
   const split = reference.split(';');
-  if(split.length>1) return {model: split[0], field: split[1]}
-  else return {model: split[0], field: 'id'}
+  if(split.length>1) return {validator: split[0], field: split[1]}
+  else return {validator: split[0], field: 'id'}
 }
 
 function getDataType(split){
@@ -53,80 +53,92 @@ function getDataType(split){
   }
 }
 
-function formatAttributes(attribute) {
-  let result;
-  const split = attribute.split(':');
-
-  if (split.length === 2) {
-    result = {
-      fieldName: split[0],
-      dataType: split[1],
-      dataFunction: null,
-      dataValues: null,
-    };
-  } else if (split.length === 3) {
-    if(split[2].startsWith('ref')){
-      result = {
-        fieldName: split[0],
-        dataType: split[1],
-        dataFunction: null,
-        dataValues: null,
-        reference: getReference(split[2])
-      }
-    } else if(split[2].startsWith('notNull')) {
-      result = {
-        fieldName: split[0],
-        dataType: split[1],
-        dataFunction: null,
-        dataValues: null,
-        notNull: true
-      }
-    }
-    else {
-      result = getDataType(split);
-      if(!result){
-        result = {
-          fieldName: split[0],
-          dataType: split[1],
-          dataFunction: null,
-          dataValues: null,
-        };
-      }
-    }
+function validationMap(dataTypes){
+  const validators = {
+    string: ['uuid', 'text', 'string'],
+    number: ['double', 'integer', 'float', 'number'],
+    boolean: ['boolean'],
+    data: ['data']  
   }
-  else if(split.length === 4) {
-    result  = getDataType(split);
-    if(!result){
+
+  const dataType = Object.keys(validators).find(key => validators[key].find(c => c.split(':')[0].includes(dataTypes)));
+  if(dataType) return dataType;
+  return dataTypes;
+}
+
+function formatAttributes(attribute) {
+    let result;
+    const split = attribute.split(':');
+  
+    if (split.length === 2) {
       result = {
         fieldName: split[0],
-        dataType: split[1],
+        dataType: validationMap(split[1]),
         dataFunction: null,
         dataValues: null,
       };
+    } else if (split.length === 3) {
       if(split[2].startsWith('ref')){
+        result = {
+          fieldName: split[0],
+          dataType: validationMap(split[1]),
+          dataFunction: null,
+          dataValues: null,
+          reference: getReference(split[2])
+        }
+      } else if(split[2].startsWith('notNull')) {
+        result = {
+          fieldName: split[0],
+          dataType: validationMap(split[1]),
+          dataFunction: null,
+          dataValues: null,
+          notNull: true
+        }
+      }
+      else {
+        result = getDataType(split);
+        if(!result){
+          result = {
+            fieldName: split[0],
+            dataType: validationMap(split[1]),
+            dataFunction: null,
+            dataValues: null,
+          };
+        }
+      }
+    }
+    else if(split.length === 4) {
+      result  = getDataType(split);
+      if(!result){
+        result = {
+          fieldName: split[0],
+          dataType: validationMap(split[1]),
+          dataFunction: null,
+          dataValues: null,
+        };
+        if(split[2].startsWith('ref')){
+          result.reference =  getReference(split[2])
+        } 
+        if(split[3].startsWith('notNull')) {
+          result.notNull = true;
+        } 
+      } else {
+      if(split[3].startsWith('ref')){
         result.reference =  getReference(split[2])
-      } 
-      if(split[3].startsWith('notNull')) {
+      } else if(split[3].startsWith('notNull')) {
         result.notNull = true;
       } 
-    } else {
-    if(split[3].startsWith('ref')){
-      result.reference =  getReference(split[2])
-    } else if(split[3].startsWith('notNull')) {
-      result.notNull = true;
-    } 
-  }
-  } else if(split.length === 5) {
-    result = getDataType(split);
-    if(split[3].startsWith('ref')){
-      result.reference =  getReference(split[3])
-    } else if(split[4].startsWith('notNull')) {
-      result.notNull = true;
     }
+    } else if(split.length === 5) {
+      result = getDataType(split);
+      if(split[3].startsWith('ref')){
+        result.reference =  getReference(split[3])
+      } else if(split[4].startsWith('notNull')) {
+        result.notNull = true;
+      }
+    }
+    return result;
   }
-  return result;
-}
-
 module.exports = {
   transformAttributes(flag) {
     /*
@@ -174,7 +186,7 @@ module.exports = {
   },
 
   generateFileContent(args) {
-    return helpers.template.render('models/model.js', {
+    return helpers.template.render('validations/create-validation.js', {
       name: args.name,
       attributes: this.transformAttributes(args.attributes),
       underscored: args.underscored,
@@ -182,12 +194,12 @@ module.exports = {
   },
 
   generateFile(args) {
-    const modelPath = helpers.path.getModelPath(args.name);
+    const validatorPath = helpers.path.getValidationPath(args.name);
 
-    helpers.asset.write(modelPath, this.generateFileContent(args));
+    helpers.asset.write(validatorPath, this.generateFileContent(args));
   },
 
-  modelFileExists(filePath) {
+  validatorFileExists(filePath) {
     return helpers.path.existsSync(filePath);
   },
 };

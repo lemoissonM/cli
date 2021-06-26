@@ -58,6 +58,20 @@ module.exports = {
     );
   },
 
+  getControllerPath(controllerName) {
+    return path.resolve(
+      this.getPath('controller'),
+      this.addFileExtension(controllerName.toLowerCase())
+    );
+  },
+
+  getValidationPath(validationName) {
+    return path.resolve(
+      this.getPath('validator'),
+      this.addFileExtension(validationName.toLowerCase())
+    );
+  },
+
   getSeederPath(seederName) {
     return path.resolve(
       this.getPath('seeder'),
@@ -78,7 +92,6 @@ module.exports = {
 
   resolve(packageName) {
     let result;
-
     try {
       result = resolve(packageName, { basedir: process.cwd() });
       result = require(result);

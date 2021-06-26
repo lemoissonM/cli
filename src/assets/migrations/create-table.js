@@ -12,7 +12,9 @@ module.exports = {
 
       <% attributes.forEach(function(attribute) { %>
         <%= attribute.fieldName %>: {
-          type: Sequelize.<%= attribute.dataFunction ? `${attribute.dataFunction.toUpperCase()}(Sequelize.${attribute.dataType.toUpperCase()})` : attribute.dataValues ? `${attribute.dataType.toUpperCase()}(${attribute.dataValues})` : attribute.dataType.toUpperCase() %>
+          type: Sequelize.<%= attribute.dataFunction ? `${attribute.dataFunction.toUpperCase()}(Sequelize.${attribute.dataType.toUpperCase()})` : attribute.dataValues ? `${attribute.dataType.toUpperCase()}(${attribute.dataValues})` : attribute.dataType.toUpperCase() %>,
+          <%=attribute.reference ? `reference:{model: '${attribute.reference.model}',key: '${attribute.reference.field}'},`: ''%>
+          <%=attribute.notNull ? `allowNull:false,`: ''%>
         },
       <% }) %>
 

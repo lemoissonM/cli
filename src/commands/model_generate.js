@@ -34,6 +34,18 @@ exports.handler = function (args) {
     helpers.view.error(err.message);
   }
 
+  try {
+    helpers.controller.generateControllerFile(args);
+  } catch (err) {
+    helpers.view.error(err.message);
+  }
+
+  try {
+    helpers.validation.generateFile(args);
+  } catch (err) {
+    helpers.view.error(err.message);
+  }
+
   helpers.migration.generateTableCreationFile(args);
   helpers.view.log(
     'New model was created at',
@@ -47,6 +59,16 @@ exports.handler = function (args) {
         helpers.migration.generateMigrationName(args)
       )
     ),
+    '.'
+  );
+  helpers.view.log(
+    'New controller was created at',
+    clc.redBright(helpers.path.getControllerPath(args.name)),
+    '.'
+  );
+  helpers.view.log(
+    'New validator file was created at',
+    clc.redBright(helpers.path.getValidationPath(args.name)),
     '.'
   );
 

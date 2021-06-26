@@ -51,6 +51,14 @@ const init = {
     createFolder('models', helpers.path.getModelsPath(), force);
   },
 
+  createControllerFolder: (force) => {
+    createFolder('controllers', helpers.path.getControllerPath(), force);
+  },
+
+  createValidationFolder: (force) => {
+    createFolder('validations', helpers.path.getValidationPath(), force);
+  },
+
   createModelsIndexFile: (force) => {
     const modelsPath = helpers.path.getModelsPath();
     const indexPath = path.resolve(

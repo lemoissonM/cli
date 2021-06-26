@@ -49,6 +49,16 @@ export function _baseOptions(yargs) {
       default: 'models',
       type: 'string',
     })
+    .option('controllers-path', {
+      describe: 'The path to the controller folder',
+      default: 'controllers',
+      type: 'string',
+    })
+    .option('validators-path', {
+      describe: 'The path to the validators folder',
+      default: 'validators',
+      type: 'string',
+    })
     .option('url', {
       describe:
         'The database connection string to use. Alternative to using --config files',
